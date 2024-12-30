@@ -8,13 +8,8 @@ db = SQLAlchemy()
 # Role-User 관계 테이블
 roles_users = db.Table(
     'roles_users',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
 )
-
-class Role(db.Model, RoleMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True)
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)

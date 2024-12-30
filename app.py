@@ -16,7 +16,7 @@ security = Security(app, user_datastore)
 app.register_blueprint(auth_bp, url_prefix='/auth')
 
 @app.before_first_request
-def create_user():
+def create_tables():
     db.create_all()
 
 if __name__ == '__main__':
