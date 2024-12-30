@@ -1,33 +1,36 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_security import UserMixin, RoleMixin
 from datetime import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
-# Role-User 관계 테이블
-roles_users = db.Table(
-    'roles_users',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
-)
-
-class Role(db.Model, RoleMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True)
-
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    name = db.Column(db.String(255), nullable=False)
     height = db.Column(db.Float, nullable=True)
     age = db.Column(db.Integer, nullable=True)
-    gender = db.Column(db.String(10), nullable=True)
-    smoking_history = db.Column(db.Boolean, nullable=True)
+    gender = db.Column(db.Binary, nullable=True)
+    smoking_history = db.Column(db.Integer, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def set_password(self, raw_password):
-        self.password = generate_password_hash(raw_password)
+class Doctor(db.Model):
+    __tablename__ = 'doctors'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    password = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def verify_password(self, raw_password):
-        return check_password_hash(self.password, raw_password)
+class Carelist(db.Model):
+    __tablename__ = 'carelist'
+    doc_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+
+class History(db.Model):
+    __tablename__ = 'history'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    weight = db.Column(db.Float, nullable=True)
+    blood_glucose = db.Column(db.Integer, nullable=True)
+    blood_pressure = db.Column(db.Integer, nullable=True)
+    at = db.Column(db.DateTime, default=datetime.utcnow)
