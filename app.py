@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore
 from models import db, Role, User
 from auth.routes import auth_bp
+from history.routes import history_bp
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -14,6 +15,7 @@ security = Security(app, user_datastore)
 
 # Blueprint 등록
 app.register_blueprint(auth_bp, url_prefix='/auth')
+app.register_blueprint(history_bp, url_prefix='/api')
 
 @app.before_first_request
 def create_tables():
