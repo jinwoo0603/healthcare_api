@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore
-from models import db, Role, User
+from models import db, User, Doctor, Carelist, History
 from auth.routes import auth_bp
 from history.routes import history_bp
 
@@ -10,7 +10,7 @@ app.config.from_pyfile('config.py')
 
 # 데이터베이스 및 Flask-Security 초기화
 db.init_app(app)
-user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+user_datastore = SQLAlchemyUserDatastore(db, User, Doctor, Carelist, History)
 security = Security(app, user_datastore)
 
 # Blueprint 등록
