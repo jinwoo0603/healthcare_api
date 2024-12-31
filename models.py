@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
@@ -13,7 +13,7 @@ class User(db.Model):
     birthdate = db.Column(db.Date, nullable=True)
     gender = db.Column(db.Binary, nullable=True)
     smoking_history = db.Column(db.Integer, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Doctor(db.Model):
     __tablename__ = 'doctors'
@@ -22,7 +22,7 @@ class Doctor(db.Model):
     password = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(255), nullable=False)
     doc_no = db.Column(db.Integer, unique=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Carelist(db.Model):
     __tablename__ = 'carelist'
@@ -36,4 +36,4 @@ class History(db.Model):
     weight = db.Column(db.Float, nullable=True)
     blood_glucose = db.Column(db.Integer, nullable=True)
     blood_pressure = db.Column(db.Integer, nullable=True)
-    at = db.Column(db.DateTime, default=datetime.utcnow)
+    at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
