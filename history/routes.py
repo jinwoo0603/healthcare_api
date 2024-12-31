@@ -28,10 +28,10 @@ def create_history():
         blood_pressure=int(blood_pressure)
     )
     
-    # AI 모델 적용 코드 추가할것
-    
     db.session.add(new_history)
     db.session.commit()
+        
+    # AI 모델 적용 코드 추가할것
 
     return jsonify({
         "message": "History record created successfully",
