@@ -53,6 +53,7 @@ def login_doctor_route():
         "doctor": {
             "id": doctor.id,
             "email": doctor.email,
+            "name": doctor.name,
             "doc_no": doctor.doc_no
         }
     }), 200
@@ -90,6 +91,7 @@ def register_doctor():
     data = request.json
     email = data.get('email')
     password = data.get('password')
+    name = data.get('name')
     doc_no = data.get('doc_no')
 
     if Doctor.query.filter_by(email=email).first():
@@ -101,6 +103,7 @@ def register_doctor():
     new_doctor = Doctor(
         email=email,
         password=hashed_password,
+        name=name,
         doc_no=int(doc_no)
     )
     db.session.add(new_doctor)

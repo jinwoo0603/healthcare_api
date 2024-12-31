@@ -20,6 +20,7 @@ class Doctor(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(255), nullable=False)
     doc_no = db.Column(db.Integer, unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
