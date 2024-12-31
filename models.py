@@ -10,7 +10,7 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(255), nullable=False)
     height = db.Column(db.Float, nullable=True)
-    age = db.Column(db.Integer, nullable=True)
+    birthdate = db.Column(db.Date, nullable=True)
     gender = db.Column(db.Binary, nullable=True)
     smoking_history = db.Column(db.Integer, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -18,7 +18,9 @@ class User(db.Model):
 class Doctor(db.Model):
     __tablename__ = 'doctors'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    doc_no = db.Column(db.Integer, unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Carelist(db.Model):
