@@ -13,6 +13,7 @@ class User(db.Model):
     birthdate = db.Column(db.Date, nullable=True)
     gender = db.Column(db.Binary, nullable=True)
     smoking_history = db.Column(db.Integer, nullable=True)
+    social_id = db.Column(db.String(255), nullable=False, unique=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Doctor(db.Model):

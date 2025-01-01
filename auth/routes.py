@@ -68,9 +68,12 @@ def register_user():
     birthdate = data.get('birthdate')  # YYYY-MM-DD 형식
     gender = data.get('gender')
     smoking_history = data.get('smoking_history')
+    social_id = data.get('social_id')  # 주민등록번호
 
     if User.query.filter_by(email=email).first():
         return jsonify({"message": "Email already exists"}), 400
+    if User.query.filter_by(social_id=generate_password_hash(social_id)).first():
+        return jsonify({"message": "Social ID already exists"}), 400
 
     hashed_password = generate_password_hash(password, method='sha256')
     new_user = User(
@@ -82,6 +85,8 @@ def register_user():
         gender=gender.encode() if gender else None,
         smoking_history=int(smoking_history) if smoking_history else None
     )
+    new_user.set_social_id(social_id)  # 주민등록번호 해싱 후 저장
+
     db.session.add(new_user)
     db.session.commit()
     return jsonify({"message": "User registered successfully"}), 201
