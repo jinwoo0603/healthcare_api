@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_security import login_required, current_user
 from models import db, History
+import pandas as pd
+import joblib
+import datetime as dt
 
 history_bp = Blueprint('history', __name__)
 
@@ -15,6 +18,12 @@ def create_history():
     blood_glucose = data.get('blood_glucose')
     weight = data.get('weight')
     blood_pressure = data.get('blood_pressure')
+    
+    height = current_user.height
+    smoking_history = current_user.smoking_history
+    age = dt.datetime.now().year - current_user.birthdate.year
+    bmi = weight / (height / 100.0) ** 2
+    gender = int(current_user.gender)
 
     # 입력 값 검증
     if blood_glucose is None or weight is None or blood_pressure is None:
@@ -27,12 +36,40 @@ def create_history():
         weight=float(weight),
         blood_pressure=int(blood_pressure)
     )
-    
     db.session.add(new_history)
     db.session.commit()
         
-    # AI 모델 적용 코드 추가할것
-
+    # AI 모델 적용
+    scaler = joblib.load("../ml/diabetes_scaler.pkl")
+    pca = joblib.load("../ml/diabetes_pca.pkl")
+    hbA1c = joblib.load("../ml/hbA1c.pkl")
+    heart = joblib.load("../ml/heart.pkl")
+    
+    pred_data = pd.DataFrame([{
+        'gender': gender,
+        'age': age,
+        'hypertension': 1 if blood_pressure > 140 else 0,
+        'heart_disease': 0,
+        'smoking_history': smoking_history,
+        'bmi': bmi,
+        'HbA1c_level': 0,
+        'blood_glucose_level': blood_glucose,
+        'diabetes': 0
+    }])
+    
+    data_scaled = scaler.transform(pred_data)
+    data_scaled = pd.DataFrame(data_scaled, columns=data.columns)
+    data_pca = pca.transform(data_scaled)
+    data_scaled['pca1'] = data_pca[:,0]
+    data_scaled['pca2'] = data_pca[:,1]
+    data_scaled['pca3'] = data_pca[:,2]
+    
+    X_hb1ac = data_scaled[['blood_glucose_level', 'pca1', 'pca2', 'pca3']]
+    X_heart = data_scaled[['gender', 'hypertension', 'pca1', 'pca3']]
+    
+    hbA1c_pred = hbA1c.predict(X_hb1ac)[0]
+    heart_pred = heart.predict(X_heart)[0]
+    
     return jsonify({
         "message": "History record created successfully",
         "history": {
@@ -41,5 +78,9 @@ def create_history():
             "weight": new_history.weight,
             "blood_pressure": new_history.blood_pressure,
             "at": new_history.at
+        },
+        "prediction": {
+            "hbA1c": float(hbA1c_pred),
+            "heart": float(heart_pred)
         }
     }), 201
