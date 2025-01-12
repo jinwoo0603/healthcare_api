@@ -21,7 +21,7 @@ def login_user_route():
     if not user or not check_password_hash(user.password, password):
         return jsonify({"message": "Invalid email or password"}), 401
 
-    login_user(user)
+    login_user(user, remember=True)
     return jsonify({
         "message": "User login successful",
         "user": {
