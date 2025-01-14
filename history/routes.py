@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_security import login_required, current_user
+from sqlalchemy.sql import func
 from models import db, History
 import pandas as pd
 import joblib
@@ -84,3 +85,48 @@ def create_history():
             "heart": float(heart_pred)
         }
     }), 201
+
+@history_bp.route('/history', methods=['GET'])
+@login_required
+def view_history():
+    """
+    로그인한 유저의 최근 기록 및 전체 기록 평균을 반환합니다.
+    """
+    user_id = current_user.id
+
+    # 최근 기록
+    recent_record = History.query.filter_by(user_id=user_id).order_by(History.at.desc()).first()
+
+    # 전체 기록 평균 계산
+    averages = db.session.query(
+        func.avg(History.blood_glucose).label('avg_blood_glucose'),
+        func.avg(History.weight).label('avg_weight'),
+        func.avg(History.blood_pressure).label('avg_blood_pressure')
+    ).filter_by(user_id=user_id).one()
+
+    if not recent_record:
+        return jsonify({
+            "message": "No history records found for the user.",
+            "recent_record": None,
+            "averages": {
+                "avg_blood_glucose": None,
+                "avg_weight": None,
+                "avg_blood_pressure": None
+            }
+        }), 200
+
+    # 결과 반환
+    return jsonify({
+        "message": "History summary retrieved successfully.",
+        "recent_record": {
+            "blood_glucose": recent_record.blood_glucose,
+            "blood_pressure": recent_record.blood_pressure,
+            "weight": recent_record.weight,
+            "timestamp": recent_record.at.strftime('%Y-%m-%d %H:%M:%S')
+        },
+        "averages": {
+            "avg_blood_glucose": round(averages.avg_blood_glucose, 2) if averages.avg_blood_glucose else None,
+            "avg_weight": round(averages.avg_weight, 2) if averages.avg_weight else None,
+            "avg_blood_pressure": round(averages.avg_blood_pressure, 2) if averages.avg_blood_pressure else None
+        }
+    }), 200
